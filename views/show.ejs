@@ -1,0 +1,24 @@
+<% layout("/layouts/bolierplate") %>
+<body>
+    <div class="row">
+        <div class="col-8 offset-2">
+    <h3>Product Details:</h3>
+    </div>
+    <div class="card col-6 offset-2">
+        <img src="<%=products.image%>" class="card-img-top view-img" alt="...">
+        <div class="card-body">
+          <p class="card-text"><b><%=products.title%></b>
+          <br/><%=products.description%><br/><%=products.price%><br/><%=products.location%><br/>Handicrafted:<%=products.handicrafted%></p>
+        </div>
+    <div class="col-1">
+    <a href="/products/<%=products._id%>/edit" class="btn btn-dark ">Edit</a>
+    </div>
+    <br/>
+    <div class="col-1">
+    <form method="POST" action="/products/<%=products._id%>?_method=Delete">
+        <button class="btn btn-dark ">Delete</button>
+    </form>
+  </div>
+    </div>
+    </div>
+</body>

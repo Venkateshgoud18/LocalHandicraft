@@ -1,0 +1,38 @@
+<% layout("/layouts/bolierplate") %>
+<body>
+    <h3>Edit product</h3>
+    <form method="POST" action="/products/<%=products._id%>?_method=PUT" novalidate class="needs-validation">
+        <div class="row">
+            <div class="col-8 offset-2">
+        <div class="mb-3">
+            <label for="title" class="form-label">Title:</label>
+            <input name="products[title]" value="<%=products.title%>" type="text" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Description:</label>
+            <textarea name="products[description]" class="form-control" <%=products.description%> ></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="image" class="form-label">Image:</label>
+            <input name="products[image]" value="<%=products.image%>" type="text" class="form-control" required>
+        </div>
+        <div class="row">
+        <div class="mb-3 col-md-4">
+            <label for="price" class="form-label">Price</label>
+            <input name="products[price]" value="<%=products.price%>" type="text" class="form-control" required>
+        </div>
+        <div class="mb-3 col-md-8">
+            <label for="location" class="form-label">location</label>
+            <input name="products[location]" value="<%=products.location%>" type="text" class="form-control" required>
+        </div>
+        </div>
+        <div class="mb-3">
+            <label for="handicrafted" class="form-label">Handi crated</label>
+            <input name="products[handicrafted]" value="<%=products.handicrafted%>" type="text" class="form-control" required>
+        </div>
+        <br></br>
+        <button class="btn btn-dark edit-btn mt-3">Edit</button>
+        </div>
+        </div>
+    </form>
+</body>

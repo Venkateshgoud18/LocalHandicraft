@@ -1,0 +1,40 @@
+<% layout("/layouts/bolierplate") %>
+<body>
+    <div class="row">
+        <div class="col-8 offset-2">
+    <form method="POST" action="/products" novalidate class="needs-validation">
+        <div class="mb-3">
+        <label for="title" class="form-label">Title:</label>
+        <input name="products[title]" placeholder="enter title" type="text" class="form-control" required  />
+        <div class="valid-feedback">Title looks good!</div>
+        </div>
+        <div class="mb-3">
+        <label for="description" class="form-label">description</label>
+        <textarea name="products[description]" placeholder="enter description" class="form-control" required></textarea>
+        <div class="invalid-feedback">Please enter description</div>
+        </div>
+        <div class="mb-3">
+        <label for="image" class="form-label">Image</label>
+        <input name="products[image]" placeholder="enter image URL/link" type="text" class="form-control">
+        </div>
+        <div class="row">
+        <div class="mb-3 col-4">
+        <label for="price" class="form-label">price</label>
+        <input name="products[price]" placeholder="enter price" class="form-control" required>
+        <div class="invalid-feedback">Price should valid</div>
+        </div>
+        <div class="mb-3 col-8">
+        <label for="location" class="form-label">loaction</label>
+        <input name="products[location]" placeholder="enter location" type="text" class="form-control" required>
+        <div class="invalid-feedback">Please enter the location</div>
+        </div>
+        </div>
+        <div class="mb-3">
+        <label for="handicrafted" class="form-label">handicrafted</label>
+        <input name="products[handicrafted]" type="checkbox" class="form-check-input" value="true">
+        </div>
+        <button class="btn btn-dark add-btn">add</button>
+    </form>
+    </div>
+    </div>
+</body>
