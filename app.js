@@ -12,6 +12,9 @@ const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/ExpressError.js");
 const {productSchema}=require("./schema.js");
 
+
+
+
 main()
 .then(()=>{
     console.log("connected to db");
@@ -75,6 +78,13 @@ const validateProducts=(req,res,next)=>{
         next();
     }
 }
+
+const isLoggedIn = (req, res, next) => {
+    if (!req.isAuthenticated()) {
+        return res.redirect("/login");
+    }
+    next();
+};
 /*app.get("/testListing",async (req,res)=>{
     let sampleListing=new Listing({
         title:"local handicraft",
@@ -93,43 +103,52 @@ app.get("/products",async (req,res)=>{
     res.render("index.ejs",{alllistings});
 })
 //new route
-app.get("/products/new",(req,res)=>{
+// Add Product Page - Protected
+app.get("/products/new", isLoggedIn, (req, res) => {
     res.render("new.ejs");
-})
+});
+
 //get route
-app.get("/products/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const products=await Listing.findById(id);
-    res.render("show.ejs",{products});
-}))
+app.get("/products/:id", wrapAsync(async (req, res, next) => {
+    const { id } = req.params;
+    const products = await Listing.findById(id).populate("owner");
+
+    if (!products) {
+        return next(new ExpressError(404, "Product Not Found"));
+    }
+
+    res.render("show.ejs", { products });
+}));
+ 
+
+
 //create route
-app.post("/products",validateProducts,wrapAsync(async (req,res,next)=>{
-    const newListings=new Listing(req.body.products);
-    await newListings.save();
+app.post("/products", validateProducts, wrapAsync(async (req, res) => {
+    const { title, description, image} = req.body;
+    const newListing = new Listing({ title, description, image });
+    await newListing.save();
     res.redirect("/products");
 }));
+
+
 //edit route
-app.get("/products/:id/edit",validateProducts,wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    const products=await Listing.findById(id);
-    res.render("edit.ejs",{products});
-}))
+app.get("/products/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
+    let { id } = req.params;
+    const products = await Listing.findById(id);
+    res.render("edit.ejs", { products });
+}));
 //update route
-app.put("/products/:id",validateProducts,wrapAsync(async (req,res)=>{
-    if(!req.body.products){
-        throw new ExpressError(400,"Send valid data for products");
-    }
-    let {id}=req.params;
-    await Listing.findByIdAndUpdate(id,{...req.body.products});
+app.put("/products/:id", isLoggedIn, validateProducts, wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndUpdate(id, { ...req.body.products });
     res.redirect(`/products/${id}`);
-}))
+}));
 //delete route
-app.delete("/products/:id",wrapAsync(async (req,res)=>{
-    let {id}=req.params;
-    let DeleteListing=await Listing.findByIdAndDelete(id);
-    console.log(DeleteListing);
+app.delete("/products/:id", isLoggedIn, wrapAsync(async (req, res) => {
+    const { id } = req.params;
+    await Listing.findByIdAndDelete(id);
     res.redirect("/products");
-}))
+}));
 // Sign up form
 app.get("/register", (req, res) => {
     res.render("auth/register"); // create this view
@@ -170,12 +189,7 @@ app.get("/logout", (req, res,next) => {
         res.redirect("/products");
     });
 });
-const isLoggedIn = (req, res, next) => {
-    if (!req.isAuthenticated()) {
-        return res.redirect("/login");
-    }
-    next();
-};
+
 
 // Example: protect "new" route
 app.get("/products/new", isLoggedIn, (req, res) => {

@@ -1,24 +1,32 @@
 <% layout("/layouts/bolierplate") %>
+
 <body>
+  <div class="container my-5">
     <div class="row">
-        <div class="col-8 offset-2">
-    <h3>Product Details:</h3>
-    </div>
-    <div class="card col-6 offset-2">
-        <img src="<%=products.image%>" class="card-img-top view-img" alt="...">
-        <div class="card-body">
-          <p class="card-text"><b><%=products.title%></b>
-          <br/><%=products.description%><br/><%=products.price%><br/><%=products.location%><br/>Handicrafted:<%=products.handicrafted%></p>
+      <div class="col-md-8 offset-md-2">
+        <h3 class="mb-4">Product Details</h3>
+
+        <div class="card shadow">
+          <img src="<%= products.image || '/images/default.jpg' %>" class="card-img-top view-img" alt="<%= products.title %>">
+
+          <div class="card-body">
+            <h5 class="card-title"><%= products.title %></h5>
+            <p class="card-text"><%= products.description %></p>
+            <p class="card-text"><strong>Price:</strong> ₹ <%= products.price %></p>
+            <p class="card-text"><strong>Location:</strong> <%= products.location %></p>
+            <p class="card-text"><strong>Handicrafted:</strong> <%= products.handicrafted ? "Yes" : "No" %></p>
+          </div>
+
+
+          <div class="card-body d-flex gap-2">
+              <a href="/products/<%= products._id %>/edit" class="btn btn-warning">Edit</a>
+              <form method="POST" action="/products/<%= products._id %>?_method=DELETE">
+                  <button class="btn btn-danger">Delete</button>
+              </form>
+          </div>
+
         </div>
-    <div class="col-1">
-    <a href="/products/<%=products._id%>/edit" class="btn btn-dark ">Edit</a>
+      </div>
     </div>
-    <br/>
-    <div class="col-1">
-    <form method="POST" action="/products/<%=products._id%>?_method=Delete">
-        <button class="btn btn-dark ">Delete</button>
-    </form>
   </div>
-    </div>
-    </div>
 </body>

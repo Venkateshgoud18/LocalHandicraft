@@ -49,22 +49,37 @@ footer{
 .card-body{
     padding:0 !important;
 }
-.card-text p{
-    font-weight: 400;
+.card-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
 }
-.products-link{
+.card-footer {
+    background-color: #fff;
+    border-top: none;
+}
+.card:hover {
+    transform: translateY(-5px);
+    transition: transform 0.2s ease-in-out;
+}
+.card-title,
+.card-text {
+    color: #8B0000 !important; /* dark red / maroon */
+}
+.products-link {
+    text-decoration: none !important;
+    color: inherit !important;
+}
+
+.products-link:hover {
     text-decoration: none !important;
 }
-.card-img-overlay{
-    opacity: 0;
-}
-.card-img-overlay:hover{
-    opacity:0.2;
-    background-color: white;
-}
-.card-img-top:hover{
-    opacity:0.2;
-}
+
+
+
+
+
 body{
     font-family:"Plus Jakarta Sans",sans-serif !important;
     display: flex;

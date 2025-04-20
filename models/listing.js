@@ -1,20 +1,17 @@
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
+const Schema = mongoose.Schema;
 
-
-const listingSchema=new mongoose.Schema({
-    title: {
-        type:String,
-    },
-    description:String,
-    image:{
-        type:String,
-        default:"https://tse1.mm.bing.net/th?id=OIP.QsoaqkIT8BNLughj8668ogHaDj&pid=Api&P=0&h=180",
-        set:(v)=>v===""?"https://tse1.mm.bing.net/th?id=OIP.QsoaqkIT8BNLughj8668ogHaDj&pid=Api&P=0&h=180":v,
-    },
-    price:Number,
-    location:String,
-    handicrafted:Boolean,
+const listingSchema = new Schema({
+    title: String,
+    description: String,
+    price: Number,
+    image: String,
+    location: String,
+    handicrafted: Boolean,
+    owner: {
+        type: Schema.Types.ObjectId,
+        ref: "User"
+    }
 });
 
-const Listing=mongoose.model("Listing",listingSchema);
-module.exports=Listing;
+module.exports = mongoose.model("Listing", listingSchema);
