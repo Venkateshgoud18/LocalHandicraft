@@ -18,12 +18,15 @@
           </div>
 
 
-          <div class="card-body d-flex gap-2">
-              <a href="/products/<%= products._id %>/edit" class="btn btn-warning">Edit</a>
-              <form method="POST" action="/products/<%= products._id %>?_method=DELETE">
-                  <button class="btn btn-danger">Delete</button>
-              </form>
-          </div>
+          <% if (currentUser && currentUser.username === "venky1026") { %>
+            <div class="card-body d-flex gap-2">
+                <a href="/products/<%= products._id %>/edit" class="btn btn-warning">Edit</a>
+                <form method="POST" action="/products/<%= products._id %>?_method=DELETE" style="display:inline;">
+                    <button class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+          <% } %>
+          
 
         </div>
       </div>

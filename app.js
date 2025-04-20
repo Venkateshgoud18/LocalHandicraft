@@ -85,6 +85,27 @@ const isLoggedIn = (req, res, next) => {
     }
     next();
 };
+
+const isAdmin = (req, res, next) => {
+    if (!req.isAuthenticated() || req.user.username !== "venky1026") {
+        return res.redirect("/login");
+    }
+    next();
+};
+async function createAdminUser() {
+    try {
+        const user = new User({ username: "venky1026", email: "venky1026@gmail.com" });
+        await User.register(user, "1026");
+        console.log("✅ Admin user created!");
+    } catch (err) {
+        console.log("⚠️ Couldn't create admin user:", err.message);
+    }
+}
+
+
+
+createAdminUser();
+
 /*app.get("/testListing",async (req,res)=>{
     let sampleListing=new Listing({
         title:"local handicraft",
@@ -104,7 +125,7 @@ app.get("/products",async (req,res)=>{
 })
 //new route
 // Add Product Page - Protected
-app.get("/products/new", isLoggedIn, (req, res) => {
+app.get("/products/new", isAdmin, (req, res) => {
     res.render("new.ejs");
 });
 
@@ -123,7 +144,7 @@ app.get("/products/:id", wrapAsync(async (req, res, next) => {
 
 
 //create route
-app.post("/products", validateProducts, wrapAsync(async (req, res) => {
+app.post("/products",isAdmin, validateProducts, wrapAsync(async (req, res) => {
     const { title, description, image} = req.body;
     const newListing = new Listing({ title, description, image });
     await newListing.save();
@@ -132,13 +153,13 @@ app.post("/products", validateProducts, wrapAsync(async (req, res) => {
 
 
 //edit route
-app.get("/products/:id/edit", isLoggedIn, wrapAsync(async (req, res) => {
+app.get("/products/:id/edit", isAdmin, wrapAsync(async (req, res) => {
     let { id } = req.params;
     const products = await Listing.findById(id);
     res.render("edit.ejs", { products });
 }));
 //update route
-app.put("/products/:id", isLoggedIn, validateProducts, wrapAsync(async (req, res) => {
+app.put("/products/:id", isAdmin, validateProducts, wrapAsync(async (req, res) => {
     const { id } = req.params;
     await Listing.findByIdAndUpdate(id, { ...req.body.products });
     res.redirect(`/products/${id}`);
