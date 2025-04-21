@@ -12,9 +12,6 @@ const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/ExpressError.js");
 const {productSchema}=require("./schema.js");
 
-
-
-
 main()
 .then(()=>{
     console.log("connected to db");
@@ -131,15 +128,17 @@ app.get("/products/new", isAdmin, (req, res) => {
 
 //get route
 app.get("/products/:id", wrapAsync(async (req, res, next) => {
-    const { id } = req.params;
-    const products = await Listing.findById(id).populate("owner");
+    const { id } = req.params;  // Get the product id from the URL parameter
+    const product = await Listing.findById(id).populate("owner");
 
-    if (!products) {
+    if (!product) {
         return next(new ExpressError(404, "Product Not Found"));
     }
 
-    res.render("show.ejs", { products });
+    res.render("show.ejs", { product });  // Pass product to the view
 }));
+
+
  
 
 

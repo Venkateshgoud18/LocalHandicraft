@@ -1,22 +1,24 @@
-<% layout("/layouts/bolierplate") %>
+<% layout("layouts/bolierplate") %>
 <body>
     <ul>
         <div class="row row-cols-lg-3 row-cols-md-3 row-cols-sm-3">
-            <%for(let lists of alllistings){%>
-                <a href="/products/<%=lists._id%>" class="products-link">
-                <div class="card-col" style="width: 20rem;">
-                    <img src="<%=lists.image%>" class="card-img-top" alt="product_image" style="height:20rem;">
-                    <div class="card-img-overlay">product</div>
-                    <div class="card-body">
-                        <br/>
-                      <h5 class="card-title"><%=lists.title%></h5>
-                      <p class="card-text"><%=lists.description%> <br/>
-                        &#8377;<%= lists.price ? lists.price.toLocaleString("en-IN") : 'N/A' %></p>
-
+            <% for (let lists of alllistings) { %>
+                <a href="/products/<%= lists._id %>" class="products-link">
+                    <div class="card-col" style="width: 20rem;">
+                        <img src="<%= lists.image %>" class="card-img-top" alt="product_image" style="height:20rem;">
+                        <div class="card-img-overlay">product</div>
+                        <div class="card-body">
+                            <br/>
+                            <h5 class="card-title"><%= lists.title %></h5>
+                            <p class="card-text">
+                                <%= lists.description %> <br/>
+                                &#8377;<%= lists.price ? lists.price.toLocaleString("en-IN") : 'N/A' %>
+                            </p>
+                        </div>
                     </div>
-                  </div>
-                  </a>
-            <%}%>
+                </a>
+            <% } %>
+            
         </div>
     </ul>
 </body>
