@@ -1,7 +1,7 @@
 const express=require("express");
 const app=express();
 const mongoose=require("mongoose");
-const port=8080;
+const port=3000;
 const Listing=require("./models/listing.js");
 const data=require("./init/data.js");
 const mongoose_url="mongodb://127.0.0.1:27017/handcraft";
@@ -13,6 +13,10 @@ const ExpressError=require("./utils/ExpressError.js");
 const {productSchema}=require("./schema.js");
 const authRoutes = require("./routes/auth");
 const Cart = require("./models/cart");
+app.use(methodOverride('_method'));
+require("dotenv").config();
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 main()
 .then(()=>{
     console.log("connected to db");
@@ -194,20 +198,26 @@ app.delete("/products/:id", isLoggedIn, wrapAsync(async (req, res) => {
     res.redirect("/products");
 }));
 // Import the Cart model
-
 app.get("/cart", isLoggedIn, wrapAsync(async (req, res) => {
     const user = req.user;
-    console.log("User ID: ", user._id);
+    let cart = await Cart.findOne({ user: user._id }).populate("items.product");
 
-    const cart = await Cart.findOne({ user: user._id }).populate("items.product");
-    console.log("Cart contents: ", cart);
-
-    if (!cart || cart.items.length === 0) {
+    if (!cart) {
         return res.render("cart.ejs", { cart: null });
     }
 
+    // Remove items with invalid product references
+    cart.items = cart.items.filter(item => item.product !== null);
+
+    // Save the updated cart
+    await cart.save();
+
     res.render("cart.ejs", { cart });
 }));
+
+
+
+
 
 
 // Add to Cart Route
@@ -219,24 +229,26 @@ app.post("/cart/add/:productId", isLoggedIn, wrapAsync(async (req, res) => {
     let cart = await Cart.findOne({ user: user._id });
     if (!cart) {
         cart = new Cart({ user: user._id, items: [] });
-    }   
-
+    }
 
     // Check if the product is already in the cart
     const productIndex = cart.items.findIndex(item => item.product.toString() === productId);
     if (productIndex >= 0) {
+        // Product exists in cart, increment quantity
         cart.items[productIndex].quantity += 1;
     } else {
-    cart.items.push({ product: productId, quantity: 1 });
+        // Product not in cart, add it
+        cart.items.push({ product: productId, quantity: 1 });
     }
 
+    // Save the cart after updating
+    await cart.save(); // Ensure cart is saved after adding/updating the item
 
-    // Save the cart
-    await cart.save();
-
-    // Redirect back to the products page or wherever you want
+    // Redirect to products page after adding to cart
     res.redirect("/products");
 }));
+
+
 
 // View Cart Route
 
@@ -265,23 +277,53 @@ app.put("/cart/update/:productId", isLoggedIn, wrapAsync(async (req, res) => {
 
 
 // Remove Item from Cart Route
-app.post("/cart/remove/:productId", isLoggedIn, wrapAsync(async (req, res) => {
+// Remove Item from Cart Route
+app.delete("/cart/remove/:productId", isLoggedIn, wrapAsync(async (req, res) => {
     const { productId } = req.params;
     const user = req.user;
 
-    // Find the user's cart
     const cart = await Cart.findOne({ user: user._id });
 
     if (cart) {
-        // Remove the item from the cart
         cart.items = cart.items.filter(item => item.product.toString() !== productId);
-
-        // Save the cart
         await cart.save();
     }
 
     res.redirect("/cart");
 }));
+app.post("/create-checkout-session", isLoggedIn, wrapAsync(async (req, res) => {
+    const cart = await Cart.findOne({ user: req.user._id }).populate("items.product");
+
+    if (!cart || cart.items.length === 0) {
+        return res.redirect("/cart");
+    }
+
+    const line_items = cart.items.map(item => ({
+        price_data: {
+            currency: 'usd',
+            product_data: {
+                name: item.product.title,
+            },
+            unit_amount: item.product.price * 100, // in cents
+        },
+        quantity: item.quantity,
+    }));
+
+    const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        mode: 'payment',
+        line_items,
+        success_url: 'http://localhost:3000/success',
+        cancel_url: 'http://localhost:3000/cancel',
+    });
+
+    res.redirect(303, session.url);
+}));
+
+
+
+
+
 
 // Add the cart to res.locals so it can be accessed globally in all views
 
@@ -333,6 +375,13 @@ app.get("/products/new", isLoggedIn, (req, res) => {
     res.render("new.ejs");
 });
 
+app.get("/success", (req, res) => {
+    res.send("✅ Payment successful! Thank you for your order.");
+});
+
+app.get("/cancel", (req, res) => {
+    res.send("❌ Payment was cancelled.");
+});
 
 
 

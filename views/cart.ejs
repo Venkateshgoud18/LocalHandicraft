@@ -1,31 +1,48 @@
-<h1>Your Cart</h1>
+<head>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
 
-<% if (cart && cart.items.length > 0) { %>
-    <ul>
-        <% cart.items.forEach(item => { %>
-            <li>
-                <strong><%= item.product.title %></strong> 
-                (Quantity: <%= item.quantity %>)
+<div class="cart-container">
+    <h1 class="cart-heading">Your Cart</h1>
 
-                <!-- Quantity update buttons -->
-                <form action="/cart/update/<%= item.product._id %>?_method=PUT" method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="increment">
-                    <button type="submit">+</button>
-                </form>
-                <form action="/cart/update/<%= item.product._id %>?_method=PUT" method="POST" style="display:inline;">
-                    <input type="hidden" name="action" value="decrement">
-                    <button type="submit">-</button>
-                </form>
+    <% if (cart && cart.items.length > 0) { %>
+        <ul class="cart-list">
+            <% cart.items.forEach(item => { %>
+                <% if (item.product) { %>
+                    <li class="cart-item">
+                        <div class="cart-item-info">
+                            <strong class="cart-item-title"><%= item.product.title %></strong>
+                            <span class="cart-item-quantity">Quantity: <%= item.quantity %></span>
+                        </div>
 
-                <!-- Remove item from cart -->
-                <form action="/cart/remove/<%= item.product._id %>?_method=DELETE" method="POST" style="display:inline;">
-                    <button type="submit">Remove</button>
-                </form>
-            </li>
-        <% }) %>
-    </ul>
-<% } else { %>
-    <p>Your cart is empty.</p>
-<% } %>
+                        <div class="cart-item-actions">
+                            <!-- Quantity update buttons -->
+                            <form action="/cart/update/<%= item.product._id %>?_method=PUT" method="POST">
+                                <input type="hidden" name="action" value="increment">
+                                <button type="submit" class="quantity-btn">+</button>
+                            </form>
+                            <form action="/cart/update/<%= item.product._id %>?_method=PUT" method="POST">
+                                <input type="hidden" name="action" value="decrement">
+                                <button type="submit" class="quantity-btn">-</button>
+                            </form>
 
-<a href="/products">Back to Products</a>
+                            <!-- Remove item from cart -->
+                            <form action="/cart/remove/<%= item.product._id %>?_method=DELETE" method="POST">
+                                <button type="submit" class="remove-btn">Remove</button>
+                            </form>
+                        </div>
+                    </li>
+                <% } %>
+            <% }) %>
+        </ul>
+
+        <!-- Checkout button form -->
+        <form action="/create-checkout-session" method="POST" class="checkout-form">
+            <button type="submit" class="checkout-btn">Proceed to Checkout</button>
+        </form>
+    <% } else { %>
+        <p class="empty-cart-msg">Your cart is empty.</p>
+    <% } %>
+
+    <a class="back-link" href="/products">← Back to Products</a>
+</div>
