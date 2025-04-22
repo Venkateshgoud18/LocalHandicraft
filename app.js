@@ -12,7 +12,7 @@ const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/ExpressError.js");
 const {productSchema}=require("./schema.js");
 const authRoutes = require("./routes/auth");
-
+const Cart = require("./models/cart");
 main()
 .then(()=>{
     console.log("connected to db");
@@ -52,6 +52,27 @@ app.use(session({
 // Initialize Passport
 app.use(passport.initialize());
 app.use(passport.session());
+
+
+
+app.use(async (req, res, next) => {
+    res.locals.currentUser = req.user;
+
+    try {
+        if (req.user) {
+            const cart = await Cart.findOne({ user: req.user._id });
+            res.locals.currentUserCart = cart || { items: [] };
+        } else {
+            res.locals.currentUserCart = { items: [] };
+        }
+    } catch (err) {
+        console.error("Error fetching cart:", err);
+        res.locals.currentUserCart = { items: [] }; // Safe fallback
+    }
+
+    next();
+});
+
 
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
@@ -124,7 +145,7 @@ app.get("/products", async (req, res) => {
 
 //new route
 // Add Product Page - Protected
-app.get("/products/new", isAdmin, (req, res) => {
+app.get("/products/new", isAdmin,isLoggedIn, (req, res) => {
     res.render("new.ejs");
 });
 
@@ -172,6 +193,99 @@ app.delete("/products/:id", isLoggedIn, wrapAsync(async (req, res) => {
     await Listing.findByIdAndDelete(id);
     res.redirect("/products");
 }));
+// Import the Cart model
+
+app.get("/cart", isLoggedIn, wrapAsync(async (req, res) => {
+    const user = req.user;
+    console.log("User ID: ", user._id);
+
+    const cart = await Cart.findOne({ user: user._id }).populate("items.product");
+    console.log("Cart contents: ", cart);
+
+    if (!cart || cart.items.length === 0) {
+        return res.render("cart.ejs", { cart: null });
+    }
+
+    res.render("cart.ejs", { cart });
+}));
+
+
+// Add to Cart Route
+app.post("/cart/add/:productId", isLoggedIn, wrapAsync(async (req, res) => {
+    const { productId } = req.params;
+    const user = req.user; // Get the currently logged-in user
+
+    // Find or create the user's cart
+    let cart = await Cart.findOne({ user: user._id });
+    if (!cart) {
+        cart = new Cart({ user: user._id, items: [] });
+    }   
+
+
+    // Check if the product is already in the cart
+    const productIndex = cart.items.findIndex(item => item.product.toString() === productId);
+    if (productIndex >= 0) {
+        cart.items[productIndex].quantity += 1;
+    } else {
+    cart.items.push({ product: productId, quantity: 1 });
+    }
+
+
+    // Save the cart
+    await cart.save();
+
+    // Redirect back to the products page or wherever you want
+    res.redirect("/products");
+}));
+
+// View Cart Route
+
+// Update quantity in cart (PUT)
+app.put("/cart/update/:productId", isLoggedIn, wrapAsync(async (req, res) => {
+    const { productId } = req.params;
+    const { action } = req.body;
+
+    const cart = await Cart.findOne({ user: req.user._id });
+
+    if (!cart) return res.redirect("/cart");
+
+    const item = cart.items.find(i => i.product.toString() === productId);
+
+    if (!item) return res.redirect("/cart");
+
+    if (action === "increment") {
+        item.quantity += 1;
+    } else if (action === "decrement" && item.quantity > 1) {
+        item.quantity -= 1;
+    }
+
+    await cart.save();
+    res.redirect("/cart");
+}));
+
+
+// Remove Item from Cart Route
+app.post("/cart/remove/:productId", isLoggedIn, wrapAsync(async (req, res) => {
+    const { productId } = req.params;
+    const user = req.user;
+
+    // Find the user's cart
+    const cart = await Cart.findOne({ user: user._id });
+
+    if (cart) {
+        // Remove the item from the cart
+        cart.items = cart.items.filter(item => item.product.toString() !== productId);
+
+        // Save the cart
+        await cart.save();
+    }
+
+    res.redirect("/cart");
+}));
+
+// Add the cart to res.locals so it can be accessed globally in all views
+
+
 // Sign up form
 app.get("/register", (req, res) => {
     res.render("auth/register"); // create this view

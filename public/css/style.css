@@ -207,3 +207,65 @@ body{
 .register-form button:hover {
     background-color: #e63946;
 }
+/* =========================
+   Forgot Password Page Styling
+   ========================= */
+
+   .forgot-password-form {
+    max-width: 400px;
+    margin: 100px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.forgot-password-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 2rem;
+}
+
+.forgot-password-form form {
+    display: flex;
+    flex-direction: column;
+}
+
+.forgot-password-form input {
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 1rem;
+}
+
+.forgot-password-form button {
+    padding: 12px;
+    background-color: #fe424d;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.forgot-password-form button:hover {
+    background-color: #e63946;
+}
+
+.forgot-password-form p {
+    text-align: center;
+    margin-top: 15px;
+    color: #555;
+}
+
+.forgot-password-form a {
+    color: #fe424d;
+    text-decoration: none;
+}
+
+.forgot-password-form a:hover {
+    text-decoration: underline;
+}

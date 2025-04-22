@@ -1,20 +1,20 @@
 const express = require("express");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-const User = require("../models/user"); // Assuming you have a User model set up in models/user.js
+const User = require("../models/user"); 
 const passport = require("passport");
 const router = express.Router();
 
-// Load environment variables from .env file
+
 require("dotenv").config();
 
-// Log environment variables for debugging
+
 console.log("GMAIL_USER:", process.env.GMAIL_USER);
 console.log("GMAIL_PASS:", process.env.GMAIL_PASS ? "✔️ Loaded" : "❌ Missing");
 
-// Display the login page
+
 router.get("/login", (req, res) => {
-    res.render("auth/login");  // Render the login view
+    res.render("auth/login"); 
 });
 
 // Handle login logic
@@ -22,7 +22,7 @@ router.post("/login", passport.authenticate("local", {
     failureRedirect: "/login",
     failureMessage: true
 }), (req, res) => {
-    res.redirect("/products");  // Redirect to products page after successful login
+    res.redirect("/products");  
 });
 
 // Display the registration page
@@ -35,49 +35,49 @@ router.post("/register", async (req, res, next) => {
     try {
         const { username, password, email } = req.body;
         const user = new User({ username, email });
-        const registeredUser = await User.register(user, password);  // Using passport-local-mongoose plugin for user registration
+        const registeredUser = await User.register(user, password);  
         req.login(registeredUser, (err) => {
             if (err) return next(err);
-            res.redirect("/products");  // Redirect to products page after successful registration
+            res.redirect("/products");  
         });
     } catch (e) {
-        res.send("Error during registration: " + e.message);  // Error message if registration fails
+        res.send("Error during registration: " + e.message);  
     }
 });
 
-// Display the forgot password page
+
 router.get("/forgot-password", (req, res) => {
-    res.render("auth/forgot-password");  // Render the forgot password view
+    res.render("auth/forgot-password");  
 });
 
-// Handle forgot password logic
+
 router.post("/forgot-password", async (req, res) => {
     const { email } = req.body;
-    console.log("Received email: ", email);  // Debugging: Log the email received
+    console.log("Received email: ", email);  
 
     const user = await User.findOne({ email });
 
     if (!user) {
-        console.log("No user found with that email");  // Debugging
+        console.log("No user found with that email");  
         return res.status(400).send("No account with that email found.");
     }
 
-    // Generate a password reset token
+
     const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+    const resetPasswordExpires = Date.now() + 3600000; 
 
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = resetPasswordExpires;
     await user.save();
 
-    // Set up the mail transport
+
     
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         host: 'smtp.gmail.com',
-        port: 465,  // Or 587 for TLS
-        secure: true,  // Use SSL for 465, STARTTLS for 587
+        port: 465,  
+        secure: false,  
         auth: {
           user: 'goudvenki5@gmail.com',
           pass: 'venky@241',
@@ -85,12 +85,12 @@ router.post("/forgot-password", async (req, res) => {
         tls: {
           minVersion: 'TLSv1.2',
         },
-        socketTimeout: 60000,  // Increase the timeout to 60 seconds (default is 30000)
+        socketTimeout: 60000, 
       });
       
 
 
-    // Log the transporter details for debugging
+   
     console.log("Transporter created with Gmail credentials");
 
     const resetUrl = `http://${req.headers.host}/reset-password/${resetToken}`;
@@ -103,10 +103,10 @@ router.post("/forgot-password", async (req, res) => {
 
     transporter.sendMail(mailOptions, (err) => {
         if (err) {
-            console.log("Error sending email:", err);  // Debugging: Log error if email fails
+            console.log("Error sending email:", err);  
             return res.status(500).send("Error sending email.");
         }
-        console.log("Email sent successfully");  // Debugging: Log if email is successfully sent
+        console.log("Email sent successfully");  
         res.render("auth/forgot-password", { message: "An email has been sent to your address with further instructions." });
     });
 });
@@ -146,7 +146,7 @@ router.post("/reset-password/:token", async (req, res) => {
             user.resetPasswordToken = undefined;
             user.resetPasswordExpires = undefined;
             await user.save();
-            res.redirect("/login");  // Redirect to login page after password reset
+            res.redirect("/login");  
         });
     } catch (err) {
         console.log("Error:", err);
@@ -158,7 +158,7 @@ router.post("/reset-password/:token", async (req, res) => {
 router.get("/logout", (req, res, next) => {
     req.logout(function (err) {
         if (err) { return next(err); }
-        res.redirect("/products");  // Redirect to products page after logout
+        res.redirect("/products");  
     });
 });
 
