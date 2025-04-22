@@ -8,10 +8,7 @@ const listingSchema = new Schema({
     image: String,
     location: String,
     handicrafted: Boolean,
-    owner: {
-        type: Schema.Types.ObjectId,
-        ref: "User"
-    }
+    
 });
 
 module.exports = mongoose.model("Listing", listingSchema);

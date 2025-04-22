@@ -11,6 +11,7 @@ const ejsMate=require("ejs-mate");
 const wrapAsync=require("./utils/wrapAsync.js");
 const ExpressError=require("./utils/ExpressError.js");
 const {productSchema}=require("./schema.js");
+const authRoutes = require("./routes/auth");
 
 main()
 .then(()=>{
@@ -60,7 +61,7 @@ app.use((req, res, next) => {
     next();
 });
 
-
+app.use(authRoutes);
 app.get("/home",(req,res)=>{
     res.send("Home page")
 });
@@ -116,10 +117,11 @@ createAdminUser();
     console.log("sample was saved");
     res.send("succesfully enetered");
 })*/
-app.get("/products",async (req,res)=>{
-    const alllistings=await Listing.find({});
-    res.render("index.ejs",{alllistings});
-})
+app.get("/products", async (req, res) => {
+    const alllistings = await Listing.find({}).sort({ _id: 1 });  // Sort products by ID
+    res.render("index.ejs", { alllistings });
+});
+
 //new route
 // Add Product Page - Protected
 app.get("/products/new", isAdmin, (req, res) => {
@@ -128,14 +130,15 @@ app.get("/products/new", isAdmin, (req, res) => {
 
 //get route
 app.get("/products/:id", wrapAsync(async (req, res, next) => {
-    const { id } = req.params;  // Get the product id from the URL parameter
-    const product = await Listing.findById(id).populate("owner");
+    const { id } = req.params;  // Get the product ID from the URL
+    console.log("Requested product ID:", id);  // Debugging
+    const product = await Listing.findById(id);
 
     if (!product) {
         return next(new ExpressError(404, "Product Not Found"));
     }
 
-    res.render("show.ejs", { product });  // Pass product to the view
+    res.render("show.ejs", { product });  // Pass product data to the view
 }));
 
 
