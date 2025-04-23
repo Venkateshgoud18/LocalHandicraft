@@ -80,7 +80,7 @@ router.post("/forgot-password", async (req, res) => {
         secure: false,  
         auth: {
           user: 'goudvenki5@gmail.com',
-          pass: 'venky@241',
+          pass: 'my_password',
         },
         tls: {
           minVersion: 'TLSv1.2',
